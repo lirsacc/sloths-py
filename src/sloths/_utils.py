@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools
+from collections import deque
 from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
@@ -29,3 +30,37 @@ def batch(it: Iterable[T], by: int) -> Iterable[tuple[T, ...]]:
         if not chunk:
             break
         yield chunk
+
+
+def window(it: Iterable[T], size: int) -> Iterable[tuple[T, ...]]:
+    """
+    Create a sliding window of a specified size over the iterable.
+
+    Each window is a tuple containing 'size' elements from the iterable.
+    The windows overlap, with each window shifted one element to the right
+    from the previous window.
+
+    >>> list(window(range(5), 3))
+    [(0, 1, 2), (1, 2, 3), (2, 3, 4)]
+
+    >>> list(window([1, 2], 3))
+    []
+
+    >>> list(window([], 2))
+    []
+    """
+    if size <= 0:
+        msg = "Window size must be positive"
+        raise ValueError(msg)
+
+    iterator = iter(it)
+    win = deque(itertools.islice(iterator, size), maxlen=size)
+
+    if len(win) < size:
+        return
+
+    yield tuple(win)
+
+    for elem in iterator:
+        win.append(elem)
+        yield tuple(win)

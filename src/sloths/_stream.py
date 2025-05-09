@@ -14,7 +14,7 @@ from typing import (
     overload,
 )
 
-from ._utils import batch
+from ._utils import batch, window
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -538,6 +538,29 @@ class Stream(Generic[T], Iterable[T]):
             lambda x: itertools.islice(x, None, None, step),
             name=f"step_by({step})",
         )
+
+    def window(self, size: int) -> Stream[tuple[T, ...]]:
+        """
+        Transform the stream into a stream of sliding windows.
+
+        Each window is a tuple containing ``size`` consecutive elements from the
+        stream. The windows overlap, with each window shifted one element
+        forward
+        from the previous window.
+
+        If the stream contains fewer elements than the window size, an empty
+        stream is returned.
+
+        >>> Stream(range(5)).window(3).collect()
+        [(0, 1, 2), (1, 2, 3), (2, 3, 4)]
+
+        >>> Stream([1, 2]).window(3).collect()
+        []
+
+        >>> Stream([]).window(2).collect()
+        []
+        """
+        return Pipe(self, window, name=f"window(size={size})", size=size)
 
     def peekable(self) -> Peekable[T]:
         """

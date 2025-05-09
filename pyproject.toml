@@ -34,13 +34,12 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "coverage>=7.8.0",
+    "coverage[toml]>=7.8.0",
     "ipython>=8.36.0",
-    "nox>=2025.5.1",
+    "nox[toml]>=2025.5.1",
     "pyright>=1.1.400",
     "pytest>=8.3.5",
     "ruff>=0.11.8",
-
 ]
 docs = [
     "myst-parser>=4.0.1",
@@ -108,10 +107,10 @@ testpaths = ["src", "tests", "docs", "README.md"]
 junit_family = "xunit2"
 
 [tool.coverage.run]
+parallel = true
 branch = true
 source = ["sloths"]
 omit = ["*_test.py"]
-
 [tool.coverage.paths]
 source = ["src/"]
 

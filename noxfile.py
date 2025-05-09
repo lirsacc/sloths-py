@@ -1,6 +1,6 @@
 #!/usr/bin/env uv run --frozen --all-groups nox --no-venv -f
 # /// script
-# dependencies = ["nox>=2025.5.1"]
+# dependencies = ["nox[toml]>=2025.5.1"]
 # ///
 """
 Development commands.
@@ -100,6 +100,7 @@ def test(session: nox.Session) -> None:
         "-e",
         ".",
         *nox.project.dependency_groups(pyproject, "dev"),
+        *nox.project.dependency_groups(pyproject, "docs"),
     )
 
     opts = ["-vvls"]
@@ -118,9 +119,10 @@ def test(session: nox.Session) -> None:
     )
 
 
-@nox.session(tags=["check"], requires=["test"], python=DEFAULT_PYTHON)
+@nox.session(tags=["check"], python=DEFAULT_PYTHON)
 def coverage(session: nox.Session) -> None:
     _install_with_constraints(session, "-e", ".", "coverage")
+    session.run("coverage", "combine")
     session.run("coverage", "report")
     session.run("coverage", "html")
 
@@ -133,7 +135,7 @@ def docs(session: nox.Session) -> None:
         ".",
         *nox.project.dependency_groups(pyproject, "docs"),
     )
-    shutil.rmtree("./docs/_build")
+    shutil.rmtree("./docs/_build", ignore_errors=True)
     session.run("sphinx-build", "-M", "html", "docs/", "docs/_build")
 
 

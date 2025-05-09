@@ -731,7 +731,7 @@ class Pipe(Generic[T, P, U], Stream[U]):
         *args: P.args,
         **kwargs: P.kwargs,
     ) -> None:
-        self._source = source
+        self._inner = source
         self._transform = fn
         self._name = name
         self._iterator: Iterator[U] | None = None
@@ -742,7 +742,7 @@ class Pipe(Generic[T, P, U], Stream[U]):
     def _iter(self) -> Iterator[U]:
         return iter(
             self._transform(
-                iter(self._source),
+                iter(self._inner),
                 *self._args,
                 **self._kwargs,
             ),
@@ -750,7 +750,7 @@ class Pipe(Generic[T, P, U], Stream[U]):
 
     def __str__(self) -> str:
         name = self._name or repr(self._transform)
-        return f"{self._source} | {name}({self._args}, {self._kwargs})"
+        return f"{self._inner} | {name}({self._args}, {self._kwargs})"
 
     def __repr__(self) -> str:
         return f"Pipe<{self!s}>"
@@ -769,13 +769,17 @@ class Peekable(Stream[T]):
         self._source = source
         self._buffer: deque[T] = deque()
 
+    @functools.cached_property
+    def _iter(self) -> Iterator[T]:
+        return iter(self._source)
+
     def __iter__(self) -> Iterator[T]:
         return self
 
     def __next__(self) -> T:
         if self._buffer:
             return self._buffer.popleft()
-        return next(self._source)
+        return next(self._iter)
 
     def __repr__(self) -> str:
         return f"Peekable<{self._source!s}>"

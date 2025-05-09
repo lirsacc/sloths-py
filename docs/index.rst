@@ -18,3 +18,4 @@ Documentation
 
    usage
    cookbook
+   CHANGELOG

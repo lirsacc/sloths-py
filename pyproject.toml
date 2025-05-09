@@ -103,7 +103,7 @@ doctest_optionflags = [
     "NORMALIZE_WHITESPACE",
 ]
 
-testpaths = ["src", "tests", "docs"]
+testpaths = ["src", "tests", "docs", "README.md"]
 
 junit_family = "xunit2"
 

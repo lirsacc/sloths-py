@@ -17,8 +17,6 @@ The 2 primary goals of the library are:
 
 ```
 
-For more examples see doctests within the code or [`usage.md`](./docs/usage.md).
-
 Installation
 ------------
 

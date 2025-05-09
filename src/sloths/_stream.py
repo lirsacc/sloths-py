@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import functools
 import itertools
 from collections import deque
@@ -8,6 +9,7 @@ from typing import (
     Any,
     Concatenate,
     Generic,
+    Literal,
     ParamSpec,
     TypeAlias,
     TypeVar,
@@ -21,7 +23,10 @@ U = TypeVar("U")
 
 P = ParamSpec("P")
 
-_UNSET = object()
+
+class UNSET(enum.Enum):
+    U = enum.auto()
+
 
 Transform: TypeAlias = Callable[Concatenate[Iterable[T], P], Iterable[U]]
 
@@ -634,7 +639,12 @@ class Stream(Generic[T], Iterable[T]):
     @overload
     def nth(self, nth: int, *, default: T) -> T: ...
 
-    def nth(self, nth: int, *, default: U = _UNSET) -> T | U:
+    def nth(
+        self,
+        nth: int,
+        *,
+        default: U | Literal[UNSET.U] = UNSET.U,
+    ) -> T | U:
         """
         Return the ``nth`` value.
 
@@ -665,7 +675,7 @@ class Stream(Generic[T], Iterable[T]):
         >>> list(source)
         [4, 5, 6, 7, 8, 9]
         """
-        if default is not _UNSET:
+        if default is not UNSET.U:
             return next(itertools.islice(self, nth, None), default)
         try:
             return next(itertools.islice(self, nth, None))
@@ -776,7 +786,12 @@ class Peekable(Stream[T]):
     @overload
     def peek(self, n: int, *, default: T) -> T: ...
 
-    def peek(self, n: int = 1, *, default: U = _UNSET) -> T | U:
+    def peek(
+        self,
+        n: int = 1,
+        *,
+        default: U | Literal[UNSET.U] = UNSET.U,
+    ) -> T | U:
         """
         Return the element n positions ahead without consuming the stream.
 
@@ -814,6 +829,6 @@ class Peekable(Stream[T]):
         try:
             return self._buffer[n - 1]
         except IndexError:
-            if default is not _UNSET:
+            if default is not UNSET.U:
                 return default
             raise IndexError(n) from None

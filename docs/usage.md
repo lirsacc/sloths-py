@@ -134,34 +134,6 @@ parameter is an iterator), for example with {py:func}`itertools.islice`:
 
 (This is how the {meth}`~sloths.Stream.take` method is implemented)
 
-#### Adding your own chainable methods
-
-The easiest way to add your own chainable methods is to create a subclass of
-{class}`~sloths.Stream` as that will ensure it remains statically typed. You
-can use the {meth}`~sloths.Stream.pipe()` or any other method to keep things
-concise:
-
-```python
->>> from sloths import Stream
-
->>> def add2(v: int) -> int:
-...     return v + 2
-
->>> class MyStream(Stream):
-...     def add2(self: Stream[int]) -> Stream[int]:
-...         return self.map(add2)
-
->>> MyStream(range(10)).add2().collect()
-[2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-
-```
-
-:::{note}
-I did experiment with a decorator approach that would allow dynamically
-adding methods to the `Stream` class however this would not be statically
-checkable for type safety and while more consise felt inferior.
-:::
-
 #### Transforms can hold state
 
 As transforms work at the level of the iterator and are not element-wise they

@@ -35,6 +35,8 @@ dependencies = []
 [project.urls]
 Homepage = "https://github.com/lirsacc/sloths-py"
 Repository = "https://github.com/lirsacc/sloths-py.git"
+Documentation = "https://sloths-py.readthedocs.io/en/latest/"
+Changelog = "https://github.com/lirsacc/sloths-py/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = [

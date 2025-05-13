@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import tempfile
 from collections.abc import Iterator
+from pathlib import Path
 
 import nox
 
@@ -141,7 +142,16 @@ def spellcheck(session: nox.Session) -> None:
         ".",
         *nox.project.dependency_groups(pyproject, "docs"),
     )
-    session.run("codespell", "src", "tests", "docs/**/*.md", "docs/examples/")
+    cwd = Path.cwd()
+    session.run(
+        "codespell",
+        "--check-filenames",
+        "src",
+        "tests",
+        *cwd.glob("docs/**/*.md"),
+        *cwd.glob("*.md"),
+        "docs/examples/",
+    )
 
 
 @nox.session(python=DEFAULT_PYTHON)

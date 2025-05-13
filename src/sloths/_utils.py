@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import itertools
 from collections import deque
 from typing import TYPE_CHECKING, TypeVar
@@ -12,6 +13,10 @@ from typing import ParamSpec
 P = ParamSpec("P")
 T = TypeVar("T")
 U = TypeVar("U")
+
+
+class UNSET(enum.Enum):
+    U = enum.auto()
 
 
 def batch(it: Iterable[T], by: int) -> Iterable[tuple[T, ...]]:

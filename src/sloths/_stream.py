@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import enum
 import functools
 import itertools
 from collections import deque
@@ -16,17 +15,12 @@ from typing import (
     overload,
 )
 
-from ._utils import batch, window
+from sloths._utils import UNSET, batch, window
 
 T = TypeVar("T")
 U = TypeVar("U")
 
 P = ParamSpec("P")
-
-
-class UNSET(enum.Enum):
-    U = enum.auto()
-
 
 Transform: TypeAlias = Callable[Concatenate[Iterable[T], P], Iterable[U]]
 

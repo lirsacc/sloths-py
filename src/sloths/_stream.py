@@ -658,6 +658,9 @@ class Stream(Generic[T], Iterable[T]):
     @overload
     def nth(self, nth: int, *, default: T) -> T: ...
 
+    @overload
+    def nth(self, nth: int, *, default: U) -> T | U: ...
+
     def nth(
         self,
         nth: int,

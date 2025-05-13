@@ -436,18 +436,29 @@ class Stream(Generic[T], Iterable[T]):
 
         return Pipe(self, _flat_map, name=f"flat_map({fn})")
 
-    def filter(self, predicate: Callable[[T], bool]) -> Stream[T]:
+    def filter(self, predicate: Callable[[T], bool] | None = None) -> Stream[T]:
         """
         Filter elements by running them through a predicate function.
+
+        This supports passing no predicate ion which case it checks for truthy
+        values:
+
+        >>> Stream([1, 2, None, 0, 4]).filter().collect()
+        [1, 2, 4]
 
         >>> Stream(range(10)).filter(lambda x: bool(x % 2)).collect()
         [1, 3, 5, 7, 9]
         """
 
         def _filter(gen: Iterable[T]) -> Iterable[T]:
-            for x in gen:
-                if predicate(x):
-                    yield x
+            if predicate:
+                for x in gen:
+                    if predicate(x):
+                        yield x
+            else:
+                for x in gen:
+                    if x:
+                        yield x
 
         return Pipe(self, _filter, name=f"filter({predicate})")
 
@@ -488,7 +499,10 @@ class Stream(Generic[T], Iterable[T]):
             name=f"skip({count})",
         )
 
-    def take_while(self, predicate: Callable[[T], bool]) -> Stream[T]:
+    def take_while(
+        self,
+        predicate: Callable[[T], bool] | None = None,
+    ) -> Stream[T]:
         """
         Consume element from the stream until the predicate returns ``False``.
 
@@ -501,14 +515,21 @@ class Stream(Generic[T], Iterable[T]):
         >>> list(it)
         [4, 5, 6, 7, 8, 9]
 
+        Passing no predicate is also supported:
+
+        >>> list(Stream([1, 2, 0, 3]).take_while())
+        [1, 2]
         """
         return Pipe(
             self,
-            lambda x: itertools.takewhile(predicate, x),
+            lambda x: itertools.takewhile(predicate or bool, x),
             name=f"take_while({predicate})",
         )
 
-    def skip_while(self, predicate: Callable[[T], bool]) -> Stream[T]:
+    def skip_while(
+        self,
+        predicate: Callable[[T], bool] | None = None,
+    ) -> Stream[T]:
         """
         Skip elements until the predicate returns ``True``.
 
@@ -516,10 +537,14 @@ class Stream(Generic[T], Iterable[T]):
             .collect()
         [3, 4, 5, 6, 7, 8, 9]
 
+        Passing no predicate is also supported:
+
+        >>> list(Stream([1, 2, 0, None, 1, 2, 0, 3]).skip_while())
+        [0, None, 1, 2, 0, 3]
         """
         return Pipe(
             self,
-            lambda x: itertools.dropwhile(predicate, x),
+            lambda x: itertools.dropwhile(predicate or bool, x),
             name=f"take_while({predicate})",
         )
 
@@ -676,7 +701,7 @@ class Stream(Generic[T], Iterable[T]):
         except StopIteration:
             raise IndexError(nth) from None
 
-    def find(self, predicate: Callable[[T], bool]) -> T | None:
+    def find(self, predicate: Callable[[T], bool] | None = None) -> T | None:
         """
         Find the first elements that satisfies a predicate.
 

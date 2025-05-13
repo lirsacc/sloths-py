@@ -716,8 +716,16 @@ class Stream(Generic[T], Iterable[T]):
         3
         >>> list(source)
         [4, 5, 6, 7, 8, 9]
+
+        Returns ``None`` if the item is not found:
+
+        >>> source = iter(range(10))
+        >>> Stream(source).find(lambda x: x == 102)
+        >>> list(source)
+        []
+
         """
-        return next(self.filter(predicate))
+        return next(self.filter(predicate), None)
 
     def fold(self, fn: Callable[[U, T], U], acc: U) -> U:
         """

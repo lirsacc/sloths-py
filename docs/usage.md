@@ -77,11 +77,11 @@ An equivalent version using generators and {py:mod}`itertools`:
 
 The main difference here is that the generator version is defined from the
 inside out: the outermost transformation is actually the last stage in the
-pipeline while the stream version is flat. The lazyness aspect is applicable to
+pipeline while the stream version is flat. The laziness aspect is applicable to
 both spellings however.
 
 Note that in both cases you could just pass in a list as the `source` value
-(and any `Iterator` would work) however this would negate much of the lazyness
+(and any `Iterator` would work) however this would negate much of the laziness
 benefit from such pipelines.
 
 ### Chaining transforms
@@ -158,11 +158,11 @@ Min 0, Max 9
 
 ```
 
-### Lazyness and backpressure control
+### Laziness and backpressure control
 
 Streams by default are lazy and well-implemented transforms (i.e. generator
 transforms) provide a few interesting properties to help control backpressure
-as well as memory usage. The final transforms polls froms the last step which
+as well as memory usage. The final transforms polls from the last step which
 essentially polls up the stack until any iterable yields data.
 
 We can visualise this with the following constructed example:
@@ -318,7 +318,7 @@ In practice this is mostly useful for:
 - Dealing with infinite streams such as sockets or event streams.
 
 :::{warning}
-The lazyness can easily be lost by one bad transform. Be careful to never
+The laziness can easily be lost by one bad transform. Be careful to never
 consume the source iterator eagerly if you want the properties discussed
 above to remain true.
 :::

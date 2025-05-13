@@ -345,7 +345,7 @@ class Stream(Generic[T], Iterable[T]):
         cb: Callable[[Exception], None] | None = None,
     ) -> Stream[T]:
         """
-        Stop on the first exception and disacrd it.
+        Stop on the first exception and discard it.
 
         This is more generic than :meth:`try_map` and will catch error that
         happened when calling ``next()`` on the upstream transform but will stop

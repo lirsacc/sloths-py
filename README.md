@@ -14,7 +14,7 @@ Lazy iterator pipelines for Python.
 The 2 primary goals of the library are:
 
 - Provide an easy to use, chainable and typed API for composing generator pipelines.
-- Make it easy to control peak memory usage and throuhgput on large source datasets or long running input streams.
+- Make it easy to control peak memory usage and throughput on large source datasets or long running input streams.
 
 ```python
 >>> from sloths import Stream

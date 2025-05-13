@@ -633,8 +633,8 @@ class Stream(Generic[T], Iterable[T]):
 
         Custom collectors are also supported:
 
-        >>> Stream(range(10)).collect(set)
-        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+        >>> Stream(range(10)).map(lambda x: x // 2).collect(set)
+        {0, 1, 2, 3, 4}
         """
         if collector is None:
             return list(self)

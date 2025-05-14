@@ -11,6 +11,7 @@ from typing import (
     Generic,
     Literal,
     ParamSpec,
+    SupportsIndex,
     TypeAlias,
     TypeVar,
     overload,
@@ -49,7 +50,7 @@ class Stream(Generic[T], Iterable[T]):
 
     The simplest stream just wraps and consumes an iterable:
 
-    >>> s = Stream(range(10))
+    >>> s = Stream.range(10)
     >>> list(s)  # This will consume the iterator
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -76,7 +77,7 @@ class Stream(Generic[T], Iterable[T]):
     The equivalent form with :class:`Stream` is:
 
     >>> stream = (
-    ...     Stream(range(10))
+    ...     Stream.range(10)
     ...     .pipe(add_2)
     ...     .pipe(drop_multiples_of_3)
     ... )
@@ -161,20 +162,27 @@ class Stream(Generic[T], Iterable[T]):
     def __repr__(self) -> str:
         return f"Stream<{self._source!r}>"
 
+    @classmethod
+    def range(cls: type[Stream[int]], *args: SupportsIndex) -> Stream[int]:
+        """
+        Create a simple stream over ``range()``.
+        """
+        return Stream(range(*args))
+
     def chain(self, *others: Iterable[T]) -> Stream[T]:
         """
         Chain one or more iterables to the current ones.
 
         Works with other streams:
 
-        >>> Stream(range(10)).chain(
-        ...     Stream(range(5)).map(lambda x: x + 20)
+        >>> Stream.range(10).chain(
+        ...     Stream.range(5).map(lambda x: x + 20)
         ... ).collect()
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20, 21, 22, 23, 24]
 
         And simple iterables:
 
-        >>> Stream(range(2)).chain(range(3), range(2)).collect()
+        >>> Stream.range(2).chain(range(3), range(2)).collect()
         [0, 1, 0, 1, 2, 0, 1]
         """
         return Stream(itertools.chain(self, *others))
@@ -196,12 +204,12 @@ class Stream(Generic[T], Iterable[T]):
         ...     for x in iterable:
         ...         yield str(x)
         ...
-        >>> list(Stream(range(10)).pipe(to_str))
+        >>> list(Stream.range(10).pipe(to_str))
         ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
         .. note::
             Type information of the source stream is preserved, so in the
-            example above the first layer (``Stream(range(10))``) is a
+            example above the first layer (``Stream.range(10)``) is a
             ``Stream[int, int]`` while the final stream is ``Stream[int, str]``
             which is also an ``Iterable[str]``.
 
@@ -213,7 +221,7 @@ class Stream(Generic[T], Iterable[T]):
         ...         if x % 2:
         ...             yield str(x)
         ...
-        >>> list(Stream(range(10)).pipe(to_str_if_odd))
+        >>> list(Stream.range(10).pipe(to_str_if_odd))
         ['1', '3', '5', '7', '9']
 
         As transforms are just generator-factories they can hold state:
@@ -224,7 +232,7 @@ class Stream(Generic[T], Iterable[T]):
         ...         m, M = min(m, x), max(M, x)
         ...         yield x
         ...     print(f'Min {m}, Max {M}')
-        >>> s = Stream(range(10)).pipe(track_bounds)
+        >>> s = Stream.range(10).pipe(track_bounds)
         >>> list(s)
         Min 0, Max 9
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -248,7 +256,7 @@ class Stream(Generic[T], Iterable[T]):
         This is mostly useful for debugging but could be used as the base for
         monitoring and metrics or any other side-effects.
 
-        >>> Stream(range(4)).inspect(print).collect()
+        >>> Stream.range(4).inspect(print).collect()
         0
         1
         2
@@ -271,7 +279,7 @@ class Stream(Generic[T], Iterable[T]):
         """
         Python's ``enumerate`` as a transform.
 
-        >>> Stream(range(5, 11)).enumerate().collect()
+        >>> Stream.range(5, 11).enumerate().collect()
         [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9), (5, 10)]
         """
         return self.pipe(enumerate)
@@ -280,7 +288,7 @@ class Stream(Generic[T], Iterable[T]):
         """
         Run an element-wise transform over the stream.
 
-        >>> Stream(range(10)).map(lambda x: x * 2).collect()
+        >>> Stream.range(10).map(lambda x: x * 2).collect()
         [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
         """
 
@@ -305,17 +313,17 @@ class Stream(Generic[T], Iterable[T]):
         ...         raise ValueError(2)
         ...     return x
 
-        >>> list(Stream(range(10)).map(no_2))
+        >>> list(Stream.range(10).map(no_2))
         Traceback (most recent call last):
             ...
         ValueError: 2
 
-        >>> list(Stream(range(10)).try_map(no_2, (ValueError,)))
+        >>> list(Stream.range(10).try_map(no_2, (ValueError,)))
         [0, 1, 3, 4, 5, 6, 7, 8, 9]
 
         Optionally you can pass in a callback to handle errors out of band:
 
-        >>> list(Stream(range(10)).try_map(no_2, (ValueError,), cb=print))
+        >>> list(Stream.range(10).try_map(no_2, (ValueError,), cb=print))
         2 2
         [0, 1, 3, 4, 5, 6, 7, 8, 9]
         """
@@ -354,17 +362,17 @@ class Stream(Generic[T], Iterable[T]):
         ...         raise ValueError(2)
         ...     return x
 
-        >>> list(Stream(range(10)).map(no_2))
+        >>> list(Stream.range(10).map(no_2))
         Traceback (most recent call last):
             ...
         ValueError: 2
 
-        >>> list(Stream(range(10)).map(no_2).try_((ValueError,)))
+        >>> list(Stream.range(10).map(no_2).try_((ValueError,)))
         [0, 1]
 
         Optionally you can pass in a callback to handle errors out of band:
 
-        >>> list(Stream(range(10)).map(no_2).try_((ValueError,), cb=print))
+        >>> list(Stream.range(10).map(no_2).try_((ValueError,), cb=print))
         2
         [0, 1]
         """
@@ -395,20 +403,20 @@ class Stream(Generic[T], Iterable[T]):
             This partially unwinds the stream and will increase memory usage.
             Only buffer to amounts you're comfortable holding in memory at once.
 
-        >>> Stream(range(11)).batch(by=2).collect()
+        >>> Stream.range(11).batch(by=2).collect()
         [(0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10,)]
 
         To simply buffer without exposing groups simply chain this with
         :meth:`flatten()` which will ensure at least `by` elements are ready
         before forwarding them downstream one by one:
 
-        >>> list(Stream(range(11)).batch(by=2).flatten())
+        >>> list(Stream.range(11).batch(by=2).flatten())
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
         Batches may not have the number of elements if the end of the stream
         doesn't have enough to fill a batch:
 
-        >>> list(Stream(range(11)).batch(by=3))
+        >>> list(Stream.range(11).batch(by=3))
         [(0, 1, 2), (3, 4, 5), (6, 7, 8), (9, 10)]
         """
         return Pipe(self, batch, name=f"batch(by={by})", by=by)
@@ -419,7 +427,7 @@ class Stream(Generic[T], Iterable[T]):
 
         This is usually most useful after a buffered operation.
 
-        >>> Stream(range(11)).batch(by=2).flatten().collect()
+        >>> Stream.range(11).batch(by=2).flatten().collect()
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
         .. seealso:: :meth:`~Stream.flat_map`.
@@ -430,7 +438,7 @@ class Stream(Generic[T], Iterable[T]):
         """
         Run an element-wise transform over the stream and flatten results.
 
-        >>> Stream(range(10)).flat_map(lambda x: [x] * 2).collect()
+        >>> Stream.range(10).flat_map(lambda x: [x] * 2).collect()
         [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9]
         """
 
@@ -450,7 +458,7 @@ class Stream(Generic[T], Iterable[T]):
         >>> Stream([1, 2, None, 0, 4]).filter().collect()
         [1, 2, 4]
 
-        >>> Stream(range(10)).filter(lambda x: bool(x % 2)).collect()
+        >>> Stream.range(10).filter(lambda x: bool(x % 2)).collect()
         [1, 3, 5, 7, 9]
         """
 
@@ -481,7 +489,7 @@ class Stream(Generic[T], Iterable[T]):
 
         Taking more than the size in the iterator has no effect:
 
-        >>> Stream(range(5)).take(10).collect()
+        >>> Stream.range(5).take(10).collect()
         [0, 1, 2, 3, 4]
         """
         return Pipe(
@@ -494,7 +502,7 @@ class Stream(Generic[T], Iterable[T]):
         """
         Skip over ``count`` element from the iterator.
 
-        >>> list(Stream(range(10)).skip(4))
+        >>> list(Stream.range(10).skip(4))
         [4, 5, 6, 7, 8, 9]
         """
         return Pipe(
@@ -537,7 +545,7 @@ class Stream(Generic[T], Iterable[T]):
         """
         Skip elements until the predicate returns ``True``.
 
-        >>> Stream(range(10)).skip_while(lambda x: x == 0 or x % 3 != 0)\
+        >>> Stream.range(10).skip_while(lambda x: x == 0 or x % 3 != 0)\
             .collect()
         [3, 4, 5, 6, 7, 8, 9]
 
@@ -558,7 +566,7 @@ class Stream(Generic[T], Iterable[T]):
 
         This consumes elements after their predecessor has been consumed.
 
-        >>> Stream(range(10)).step_by(2).collect()
+        >>> Stream.range(10).step_by(2).collect()
         [0, 2, 4, 6, 8]
         """
         return Pipe(
@@ -579,7 +587,7 @@ class Stream(Generic[T], Iterable[T]):
         If the stream contains fewer elements than the window size, an empty
         stream is returned.
 
-        >>> Stream(range(5)).window(3).collect()
+        >>> Stream.range(5).window(3).collect()
         [(0, 1, 2), (1, 2, 3), (2, 3, 4)]
 
         >>> Stream([1, 2]).window(3).collect()
@@ -596,7 +604,7 @@ class Stream(Generic[T], Iterable[T]):
         """
         Return a :class:`Peekable` version of the current stream.
 
-        >>> s = Stream(range(100)).peekable()
+        >>> s = Stream.range(100).peekable()
         >>> s.peek()
         0
         """
@@ -637,17 +645,17 @@ class Stream(Generic[T], Iterable[T]):
 
         By default this collects into a list, so this:
 
-        >>> list(Stream(range(10)))
+        >>> list(Stream.range(10))
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
         Is equivalent to:
 
-        >>> Stream(range(10)).collect()
+        >>> Stream.range(10).collect()
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
         Custom collectors are also supported:
 
-        >>> Stream(range(10)).map(lambda x: x // 2).collect(set)
+        >>> Stream.range(10).map(lambda x: x // 2).collect(set)
         {0, 1, 2, 3, 4}
         """
         if collector is None:
@@ -661,7 +669,7 @@ class Stream(Generic[T], Iterable[T]):
         ``__len__`` would implicitly consume the stream in various places so is
         unsafe to add.
 
-        >>> Stream(range(100)).count()
+        >>> Stream.range(100).count()
         100
         """
         return sum(1 for _ in self)
@@ -684,22 +692,22 @@ class Stream(Generic[T], Iterable[T]):
         """
         Return the ``nth`` value.
 
-        >>> Stream(range(10)).nth(0)
+        >>> Stream.range(10).nth(0)
         0
 
-        >>> Stream(range(10)).nth(6)
+        >>> Stream.range(10).nth(6)
         6
 
         Raises ``IndexError`` if the stream is too short:
 
-        >>> Stream(range(10)).nth(12)
+        >>> Stream.range(10).nth(12)
         Traceback (most recent call last):
           ...
         IndexError: 12
 
         A ``default`` can be provided as a fallback:
 
-        >>> Stream(range(10)).nth(12, default=42)
+        >>> Stream.range(10).nth(12, default=42)
         42
 
         This short-cirtcuits so it won't consume the source iterator past the
@@ -723,7 +731,7 @@ class Stream(Generic[T], Iterable[T]):
         """
         Find the first elements that satisfies a predicate.
 
-        >>> Stream(range(10)).find(lambda x: x == 3)
+        >>> Stream.range(10).find(lambda x: x == 3)
         3
 
         This short-cirtcuits so it won't consume the source iterator past the
@@ -749,10 +757,10 @@ class Stream(Generic[T], Iterable[T]):
         """
         Fold every element into an accumulator function.
 
-        >>> Stream(range(10)).fold(lambda x,y: x + y, 0)
+        >>> Stream.range(10).fold(lambda x,y: x + y, 0)
         45
 
-        >>> Stream(range(10)).fold(lambda y, x: [x, *y], [])
+        >>> Stream.range(10).fold(lambda y, x: [x, *y], [])
         [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
         """
         return functools.reduce(fn, self, acc)
@@ -844,7 +852,7 @@ class Peekable(Stream[T]):
         """
         Return the element n positions ahead without consuming the stream.
 
-        >>> s = Stream(range(10)).peekable()
+        >>> s = Stream.range(10).peekable()
         >>> s.peek()
         0
         >>> next(s)

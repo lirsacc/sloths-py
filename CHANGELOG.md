@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.0.4](https://github.com/lirsacc/sloths-py/releases/tag/0.0.4) - 2025-05-14
+
 - Add `Stream.range()`
 - Improve typing for `Stream.nth()` when default doesn't share the element type'.
 - Fix `Stream.find()` for unmatched cases.

@@ -154,7 +154,7 @@ def spellcheck(session: nox.Session) -> None:
     )
 
 
-@nox.session(python=DEFAULT_PYTHON)
+@nox.session(python=DEFAULT_PYTHON, requires=["spellcheck"])
 def docs(session: nox.Session) -> None:
     _install_with_constraints(
         session,

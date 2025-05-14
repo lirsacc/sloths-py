@@ -327,6 +327,9 @@ class AsyncStream(Generic[T], AsyncIterable[T]):
         >>> asyncio.run(AsyncStream.range(11).batch(by=2).flatten().collect())
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
+        >>> asyncio.run(AsyncStream.range(0).batch(by=2).flatten().collect())
+        []
+
         But can also be used to flatten async results (this trivial case is
         equivalent to calling :meth:`amap`):
 
@@ -632,24 +635,6 @@ async def _batch(it: AsyncIterable[T], by: int) -> AsyncIterable[tuple[T, ...]]:
     except StopAsyncIteration:
         if _batch:
             yield tuple(_batch)
-
-
-# @overload
-# def _flatten(
-#     gen: AsyncIterable[AsyncIterable[U]],
-# ) -> AsyncIterable[U]: ...
-
-
-# @overload
-# def _flatten(
-#     gen: AsyncIterable[Iterable[U]],
-# ) -> AsyncIterable[U]: ...
-
-
-# @overload
-# def _flatten(
-#     gen: AsyncIterable[Awaitable[U]],
-# ) -> AsyncIterable[U]: ...
 
 
 async def _flatten(

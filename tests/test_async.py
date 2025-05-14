@@ -68,6 +68,10 @@ async def async_set(it: AsyncIterable[T]) -> set[T]:
         ([1, 2, 3], lambda: AsyncStream.range(4).filter()),
         ([0, 2], lambda: AsyncStream.range(4).afilter(a_is_even)),
         (
+            [(0, 1, 2, 3, 4), (5, 6, 7, 8, 9)],
+            lambda: AsyncStream.range(10).batch(5),
+        ),
+        (
             [(0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10,)],
             lambda: AsyncStream.range(11).batch(2),
         ),
@@ -79,9 +83,13 @@ async def async_set(it: AsyncIterable[T]) -> set[T]:
         ),
         (
             [2, 4],
-            lambda: AsyncStream(make_async([2, 4, 5, 6, 0, 9, 10])).take_while(
-                is_even,
-            ),
+            lambda: AsyncStream(
+                make_async([2, 4, 5, 6, 0, 9, 10]),
+            ).take_while(is_even),
+        ),
+        (
+            [2, 4, 6],
+            lambda: AsyncStream(make_async([2, 4, 6])).take_while(is_even),
         ),
         (
             [2, 4, 5, 6],
@@ -90,15 +98,31 @@ async def async_set(it: AsyncIterable[T]) -> set[T]:
             ).take_while(),
         ),
         (
+            [2, 4, 5, 6, 9, 10],
+            lambda: AsyncStream(
+                make_async([2, 4, 5, 6, 9, 10]),
+            ).take_while(),
+        ),
+        (
             [5, 6, 0, 9, 10],
-            lambda: AsyncStream(make_async([2, 4, 5, 6, 0, 9, 10])).skip_while(
-                is_even,
-            ),
+            lambda: AsyncStream(
+                make_async([2, 4, 5, 6, 0, 9, 10]),
+            ).skip_while(is_even),
+        ),
+        (
+            [],
+            lambda: AsyncStream(make_async([2, 4, 6])).skip_while(is_even),
         ),
         (
             [0, 9, 10],
             lambda: AsyncStream(
                 make_async([2, 4, 5, 6, 0, 9, 10]),
+            ).skip_while(),
+        ),
+        (
+            [],
+            lambda: AsyncStream(
+                make_async([2, 4, 5, 6, 9, 10]),
             ).skip_while(),
         ),
     ],
@@ -223,3 +247,20 @@ async def test_to_async():
     assert [0, 2, 4, 6, 8] == await Stream(range(10)).to_async().afilter(
         a_is_even,
     ).collect()
+
+
+async def test_inspect():
+    cb = mock.MagicMock()
+    await AsyncStream.range(10).inspect(cb).consume()
+    assert [
+        mock.call(0),
+        mock.call(1),
+        mock.call(2),
+        mock.call(3),
+        mock.call(4),
+        mock.call(5),
+        mock.call(6),
+        mock.call(7),
+        mock.call(8),
+        mock.call(9),
+    ] == cb.call_args_list

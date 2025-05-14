@@ -48,6 +48,11 @@ def window(it: Iterable[T], size: int) -> Iterable[tuple[T, ...]]:
     >>> list(window(range(5), 3))
     [(0, 1, 2), (1, 2, 3), (2, 3, 4)]
 
+    >>> list(window(range(5), 0))
+    Traceback (most recent call last):
+      ...
+    ValueError: Window size must be positive
+
     >>> list(window([1, 2], 3))
     []
 

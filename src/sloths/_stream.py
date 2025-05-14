@@ -362,12 +362,12 @@ class Stream(Generic[T], Iterable[T]):
         ...         raise ValueError(2)
         ...     return x
 
-        >>> list(Stream.range(10).map(no_2))
+        >>> Stream.range(10).map(no_2).collect()
         Traceback (most recent call last):
             ...
         ValueError: 2
 
-        >>> list(Stream.range(10).map(no_2).try_((ValueError,)))
+        >>> Stream.range(10).map(no_2).try_((ValueError,)).collect()
         [0, 1]
 
         Optionally you can pass in a callback to handle errors out of band:
@@ -375,6 +375,12 @@ class Stream(Generic[T], Iterable[T]):
         >>> list(Stream.range(10).map(no_2).try_((ValueError,), cb=print))
         2
         [0, 1]
+
+        If there are no errors it flows to the end normally:
+
+        >>> Stream.range(10).map(lambda x: x + 2).try_((ValueError,), cb=print)\
+            .collect()
+        [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         """
 
         def _try(gen: Iterable[T]) -> Iterable[T]:
@@ -860,8 +866,15 @@ class Peekable(Stream[T]):
 
         >>> s.peek(4)
         4
+        >>> s.peek(2)
+        2
         >>> next(s)
         1
+
+        The ``Peekable`` instance is a regular stream so you can chain calls:
+
+        >>> s.take(5).collect()
+        [2, 3, 4, 5, 6]
 
         Peeking past the stream raises ``IndexError``:
 
@@ -877,10 +890,7 @@ class Peekable(Stream[T]):
         """
         if len(self._buffer) < (n + 1):
             self._buffer.extend(
-                itertools.islice(
-                    self._source,
-                    n - len(self._buffer) + 1,
-                ),
+                itertools.islice(self._iter, n - len(self._buffer) + 1),
             )
 
         try:

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.0.5](https://github.com/lirsacc/sloths-py/releases/tag/0.0.5) - 2025-05-14
 
 - Drop `AsyncStream.from_iterable()`.
 - Fix `AsyncStream.skip_while()`.

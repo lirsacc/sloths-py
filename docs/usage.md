@@ -481,3 +481,59 @@ computation in a result container (error tuples, result wrappers, etc.):
 
 A more practical use case here would be collecting the errors and saving the
 successes while re-scheduling the failures for example.
+
+### Async pipelines
+
+There are 2 options for use with async/await based code:
+
+#### Async-from-sync
+
+Within otherwise synchronous code, you can write transforms which use the event loop and resolve `Awaitabe` internally.
+
+As a trivial example:
+
+
+```python
+>>> import asyncio
+>>> from sloths import Stream
+
+>>> async def do_something_async(x: int) -> int:
+...     await asyncio.sleep(0.001)
+...     return x + 2
+
+>>> def async_transform(it):
+...     async def gather():
+...         return await asyncio.gather(*(do_something_async(x) for x in it))
+...     yield from asyncio.run(gather())
+
+>>> Stream(range(10)).pipe(async_transform).collect()
+[2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+```
+
+Production code should implement similar controls as those provided by {func}`~sloth.ext.concurrent.threaded_map`.
+
+#### Async-native code
+
+The library provides {class}`sloths.ext.asyncio.AsyncStream` which mirrors most of the {class}`~sloths.Stream` API but over ``AsyncIterables``. It also provides a few extra quality of life methods to handle functions returning ``Awaitable``.
+
+For example:
+
+```python
+>>> import asyncio
+>>> from sloths.ext.asyncio import AsyncStream
+
+>>> async def do_something_async(x: int) -> int:
+...     await asyncio.sleep(0.001)
+...     return x + 2
+
+>>> asyncio.run(AsyncStream.range(10).amap(do_something_async).map(lambda x: x - 1).collect())
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+```
+
+As shown above the standard methods which work with synchronouse code are still available alongside some asynchronous variants such as {meth}`~sloths.ext.asyncio.AsyncStream.amap`, {meth}`~sloths.ext.asyncio.AsyncStream.afilter`, {meth}`~sloths.ext.asyncio.AsyncStream.afold`, etc.
+
+{meth}`~sloths.ext.asyncio.AsyncStream.flatten` is also more powerful and supports iterables as well as async iterables and awaitables.
+
+You can also move from synchronous to asynchronous using {meth}`~sloths.Stream.to_async` to access the async API.

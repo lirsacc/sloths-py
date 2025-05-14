@@ -45,6 +45,7 @@ dev = [
     "nox[toml]>=2025.5.1",
     "pyright>=1.1.400",
     "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
     "ruff>=0.11.8",
 ]
 docs = [
@@ -73,14 +74,16 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["ALL"]
 extend-ignore = [
-    "C901",
     "ANN",
-    "PLR0913",
-    "D203",
-    "D212",
-    "D200",
+    "C901",
     "D105",
     "D107",
+    "D200",
+    "D203",
+    "D212",
+    "PGH003",
+    "PLR0912",
+    "PLR0913",
 ]
 
 unfixable = [

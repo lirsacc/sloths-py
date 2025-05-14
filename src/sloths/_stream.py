@@ -5,6 +5,7 @@ import itertools
 from collections import deque
 from collections.abc import Callable, Iterable, Iterator
 from typing import (
+    TYPE_CHECKING,
     Any,
     Concatenate,
     Generic,
@@ -16,6 +17,9 @@ from typing import (
 )
 
 from sloths._utils import UNSET, batch, window
+
+if TYPE_CHECKING:
+    from sloths.ext.asyncio import AsyncStream
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -159,7 +163,7 @@ class Stream(Generic[T], Iterable[T]):
 
     def chain(self, *others: Iterable[T]) -> Stream[T]:
         """
-        Take two iterators and create a new iterator over both.
+        Chain one or more iterables to the current ones.
 
         Works with other streams:
 
@@ -586,6 +590,8 @@ class Stream(Generic[T], Iterable[T]):
         """
         return Pipe(self, window, name=f"window(size={size})", size=size)
 
+    # Adapters
+
     def peekable(self) -> Peekable[T]:
         """
         Return a :class:`Peekable` version of the current stream.
@@ -596,6 +602,14 @@ class Stream(Generic[T], Iterable[T]):
         """
         return Peekable(self)
 
+    def to_async(self) -> AsyncStream[T]:
+        """
+        Return a :class:`sloths.ext.asyncio.AsyncStream` version.
+        """
+        from sloths.ext.asyncio import AsyncStream, make_async
+
+        return AsyncStream(make_async(self))
+
     # Reducer / consuming methods
 
     def consume(self):
@@ -605,7 +619,7 @@ class Stream(Generic[T], Iterable[T]):
         This is useful for infinite pipelines or processing pipelines where the
         results are not important.
         """
-        for _ in iter(self):
+        for _ in self:
             pass
 
     @overload
@@ -697,10 +711,11 @@ class Stream(Generic[T], Iterable[T]):
         >>> list(source)
         [4, 5, 6, 7, 8, 9]
         """
+        self.take(nth).consume()
         if default is not UNSET.U:
-            return next(itertools.islice(self, nth, None), default)
+            return next(self, default)
         try:
-            return next(itertools.islice(self, nth, None))
+            return next(self)
         except StopIteration:
             raise IndexError(nth) from None
 

@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from sloths import Stream
-from sloths.ext.asyncio import AsyncStream
+from sloths.ext.asyncio import AsyncStream, make_async
 
 pytestmark = [pytest.mark.asyncio]
 
@@ -66,6 +66,34 @@ async def a_add(x: int, y: int) -> int:
         ),
         ([], lambda: AsyncStream.range(2).skip(4)),
         ([2, 3], lambda: AsyncStream.range(4).skip(2)),
+        (
+            [(0, 5), (1, 6), (2, 7), (3, 8), (4, 9), (5, 10)],
+            lambda: AsyncStream.range(5, 11).enumerate().try_(),
+        ),
+        (
+            [2, 4],
+            lambda: AsyncStream(make_async([2, 4, 5, 6, 0, 9, 10])).take_while(
+                is_even,
+            ),
+        ),
+        (
+            [2, 4, 5, 6],
+            lambda: AsyncStream(
+                make_async([2, 4, 5, 6, 0, 9, 10]),
+            ).take_while(),
+        ),
+        (
+            [5, 6, 0, 9, 10],
+            lambda: AsyncStream(make_async([2, 4, 5, 6, 0, 9, 10])).skip_while(
+                is_even,
+            ),
+        ),
+        (
+            [0, 9, 10],
+            lambda: AsyncStream(
+                make_async([2, 4, 5, 6, 0, 9, 10]),
+            ).skip_while(),
+        ),
     ],
 )
 async def test_async_stream_simple_cases(

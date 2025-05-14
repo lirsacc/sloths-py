@@ -741,10 +741,12 @@ async def _skip_while(
     if predicate:
         async for x in it:
             if not predicate(x):
+                yield x
                 break
     else:
         async for x in it:
             if not x:
+                yield x
                 break
 
     async for x in it:

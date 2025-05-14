@@ -168,4 +168,5 @@ def docs(session: nox.Session) -> None:
 
 @nox.session(venv_backend="none")
 def build(session: nox.Session) -> None:
+    shutil.rmtree("./dist", ignore_errors=True)
     session.run("uv", "build")

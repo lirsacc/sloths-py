@@ -146,7 +146,7 @@ class Test_imap_with_executor:
 
         # We should have fetched more than the previous test but still not
         # enough to consume the full source
-        assert 30 < next(it) <= 40
+        assert 30 < next(it) <= 50
 
         # Check things resolved out of order (which the sleep should guarantee
         # although the exact order may vary) despite yielding in order

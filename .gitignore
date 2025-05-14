@@ -13,3 +13,5 @@ wheels/
 htmlcov/
 
 docs/_build
+
+.nox

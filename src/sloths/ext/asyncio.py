@@ -463,12 +463,12 @@ class AsyncStream(Generic[T], AsyncIterable[T]):
     @overload
     async def collect(
         self,
-        collector: Callable[[AsyncIterable[T]], U],
+        collector: Callable[[AsyncIterable[T]], Awaitable[U]],
     ) -> U: ...
 
     async def collect(
         self,
-        collector: Callable[[AsyncIterable[T]], U] | None = None,
+        collector: Callable[[AsyncIterable[T]], Awaitable[U]] | None = None,
     ) -> U | list[T]:
         """
         Collect the iterator.
@@ -478,7 +478,7 @@ class AsyncStream(Generic[T], AsyncIterable[T]):
         """
         if collector is None:
             return [x async for x in self]
-        return collector(x async for x in self)
+        return await collector(self)
 
     async def count(self) -> int:
         """

@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Fix `AsyncStream.skip_while()`
+- Fix `AsyncStream.skip_while()`.
+- Fix `AsyncStream.collect()` when called with custom collector.
 
 ## [0.0.4](https://github.com/lirsacc/sloths-py/releases/tag/0.0.4) - 2025-05-14
 

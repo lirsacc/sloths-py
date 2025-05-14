@@ -1,6 +1,6 @@
 import asyncio
 import operator
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncIterable, Awaitable, Callable
 from typing import TypeVar
 from unittest import mock
 
@@ -38,6 +38,13 @@ async def a_is_even(x: int) -> bool:
 
 async def a_add(x: int, y: int) -> int:
     return x + y
+
+
+async def async_set(it: AsyncIterable[T]) -> set[T]:
+    s: set[T] = set()
+    async for x in it:
+        s.add(x)
+    return s
 
 
 @pytest.mark.parametrize(
@@ -106,6 +113,13 @@ async def test_async_stream_simple_cases(
 @pytest.mark.parametrize(
     ("expected", "err", "factory"),
     [
+        (
+            {0, 1, 2, 3, 4},
+            None,
+            lambda: AsyncStream.range(10)
+            .map(lambda x: x // 2)
+            .collect(async_set),
+        ),
         (0, None, lambda: AsyncStream.range(0).count()),
         (10, None, lambda: AsyncStream.range(10).count()),
         (0, None, lambda: AsyncStream.range(10).nth(0)),

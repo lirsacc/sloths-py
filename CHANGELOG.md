@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Drop `AsyncStream.from_iterable()`.
 - Fix `AsyncStream.skip_while()`.
 - Fix `AsyncStream.collect()` when called with custom collector.
 

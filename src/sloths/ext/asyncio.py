@@ -69,13 +69,6 @@ class AsyncStream(Generic[T], AsyncIterable[T]):
         """
         return AsyncStream(make_async(range(*args)))
 
-    @classmethod
-    def from_iterable(cls, source: Iterable[T]) -> AsyncStream[T]:
-        """
-        Wrap a sync iterable.
-        """
-        return cls(make_async(source))
-
     @functools.cached_property
     def _iter(self) -> AsyncIterator[T]:
         return aiter(self._source)

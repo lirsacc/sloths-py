@@ -829,7 +829,7 @@ examples = [
 dev = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.8.0" },
     { name = "ipython", specifier = ">=8.36.0" },
-    { name = "nox", extras = ["toml"], specifier = ">=2025.5.1" },
+    { name = "nox", specifier = ">=2025.5.1" },
     { name = "pyright", specifier = ">=1.1.400" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-asyncio", specifier = ">=0.26.0" },

@@ -1,6 +1,6 @@
 #!/usr/bin/env uv run --frozen --all-groups nox --no-venv -f
 # /// script
-# dependencies = ["nox[toml]>=2025.5.1"]
+# dependencies = ["nox>=2025.5.1"]
 # ///
 """
 Development commands.
